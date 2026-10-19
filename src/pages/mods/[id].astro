@@ -1,0 +1,53 @@
+---
+import { getCollection, render } from "astro:content";
+import { ArrowLeft, ExternalLink } from "@lucide/astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ModMeta from "../../components/mod/ModMeta.astro";
+import ModTags from "../../components/mod/ModTags.astro";
+import ModDownloads from "../../components/mod/ModDownloads.astro";
+import ModLineage from "../../components/mod/ModLineage.astro";
+import ModGrid from "../../components/mod/ModGrid.astro";
+import { modSlug } from "../../utils/mods";
+import { relatedMods } from "../../utils/lineage";
+
+export async function getStaticPaths() {
+  const mods = await getCollection("mods");
+  return mods.map((mod) => ({ params: { id: modSlug(mod) }, props: { mod, mods } }));
+}
+
+const { mod, mods } = Astro.props;
+const { Content } = await render(mod);
+const related = relatedMods(mods, mod);
+---
+
+<BaseLayout title={mod.data.shortName ?? mod.data.title} description={mod.data.description} image={mod.data.cover}>
+  <main id="main-content" data-pagefind-body>
+    <div class="shell mod-page">
+      <a class="back-link" href="/mods/"><ArrowLeft size={17} />返回模组库</a>
+      <header class="mod-hero">
+        <div class="mod-hero__image">
+          <img src={mod.data.cover} alt={`${mod.data.title} 档案封面`} width="800" height="500" />
+          <span>{mod.data.shortName}</span>
+        </div>
+        <div class="mod-hero__intro">
+          <p class="eyebrow">MOD ARCHIVE / {modSlug(mod).toUpperCase()}</p>
+          <h1>{mod.data.title}</h1>
+          {mod.data.chineseName && <p class="mod-hero__cn">{mod.data.chineseName}</p>}
+          <p class="mod-hero__description">{mod.data.description}</p>
+          <ModTags categories={mod.data.categories} tags={mod.data.tags.slice(0, 2)} />
+          <ModDownloads downloads={mod.data.downloads} />
+          <div class="mod-hero__mobile-meta"><ModMeta mod={mod} /></div>
+        </div>
+      </header>
+      <div class="mod-layout">
+        <article class="prose">
+          <Content />
+          {mod.data.screenshots.length > 0 && <section><h2>档案图像</h2><div class="screenshot-grid">{mod.data.screenshots.map((image: string) => <a href={image} target="_blank"><img src={image} alt={`${mod.data.title} 相关历史图像`} loading="lazy" /><ExternalLink size={16} /></a>)}</div></section>}
+          <section><h2>模组谱系</h2><ModLineage mod={mod} allMods={mods} /></section>
+        </article>
+        <div class="mod-layout__sidebar"><ModMeta mod={mod} /></div>
+      </div>
+      {related.length > 0 && <section class="related" data-pagefind-ignore><div class="section-heading"><div><p class="eyebrow">继续探索</p><h2>相关模组</h2></div></div><ModGrid mods={related} compact /></section>}
+    </div>
+  </main>
+</BaseLayout>

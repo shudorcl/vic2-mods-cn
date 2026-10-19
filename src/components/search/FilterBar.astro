@@ -1,0 +1,88 @@
+---
+import { Search, SlidersHorizontal } from "@lucide/astro";
+import { categoryLabels, statusLabels } from "../../utils/mods";
+---
+
+<section class="filter-panel" aria-label="筛选模组">
+  <div class="filter-search">
+    <Search size={19} aria-hidden="true" />
+    <input id="mod-query" type="search" placeholder="搜索名称、简称、题材或机制…" autocomplete="off" />
+    <kbd>/</kbd>
+  </div>
+  <div class="filter-grid">
+    <label>
+      <span>类型</span>
+      <select id="filter-category">
+        <option value="">全部类型</option>
+        {Object.entries(categoryLabels).map(([value, label]) => <option value={value}>{label}</option>)}
+      </select>
+    </label>
+    <label>
+      <span>状态</span>
+      <select id="filter-status">
+        <option value="">全部状态</option>
+        {Object.entries(statusLabels).map(([value, label]) => <option value={value}>{label}</option>)}
+      </select>
+    </label>
+    <label class="filter-checkbox">
+      <input id="filter-chinese" type="checkbox" />
+      <span>有中文可用</span>
+    </label>
+    <label>
+      <span>排序</span>
+      <select id="filter-sort">
+        <option value="score">推荐度</option>
+        <option value="updated">最近更新</option>
+        <option value="name">名称</option>
+      </select>
+    </label>
+  </div>
+  <div class="filter-result"><SlidersHorizontal size={15} /><span id="filter-count">正在统计…</span></div>
+</section>
+
+<script>
+  const query = document.querySelector<HTMLInputElement>("#mod-query");
+  const category = document.querySelector<HTMLSelectElement>("#filter-category");
+  const status = document.querySelector<HTMLSelectElement>("#filter-status");
+  const chinese = document.querySelector<HTMLInputElement>("#filter-chinese");
+  const sort = document.querySelector<HTMLSelectElement>("#filter-sort");
+  const grid = document.querySelector<HTMLElement>("[data-mod-grid]");
+  const count = document.querySelector<HTMLElement>("#filter-count");
+  const empty = document.querySelector<HTMLElement>(".empty-result");
+
+  function applyFilters() {
+    if (!grid) return;
+    const cards = [...grid.querySelectorAll<HTMLElement>("[data-mod-card]")];
+    const term = query?.value.trim().toLowerCase() ?? "";
+    let visible = 0;
+
+    for (const card of cards) {
+      const matches = (!term || card.dataset.search?.includes(term)) &&
+        (!category?.value || card.dataset.categories?.split(",").includes(category.value)) &&
+        (!status?.value || card.dataset.status === status.value) &&
+        (!chinese?.checked || card.dataset.chinese === "true");
+      card.hidden = !matches;
+      if (matches) visible++;
+    }
+
+    cards.sort((a, b) => {
+      if (sort?.value === "updated") return Number(b.dataset.updated) - Number(a.dataset.updated);
+      if (sort?.value === "name") return (a.dataset.search ?? "").localeCompare(b.dataset.search ?? "");
+      return Number(b.dataset.score) - Number(a.dataset.score);
+    }).forEach((card) => grid.append(card));
+
+    if (count) count.textContent = `显示 ${visible} / ${cards.length} 个模组`;
+    if (empty) empty.hidden = visible !== 0;
+  }
+
+  [query, category, status, chinese, sort].forEach((control) => control?.addEventListener("input", applyFilters));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "/" && document.activeElement?.tagName !== "INPUT") {
+      event.preventDefault();
+      query?.focus();
+    }
+  });
+  const initialCategory = new URLSearchParams(location.search).get("category");
+  if (initialCategory && category) category.value = initialCategory;
+  applyFilters();
+</script>

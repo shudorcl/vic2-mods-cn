@@ -1,0 +1,28 @@
+---
+import { getCollection, render } from "astro:content";
+import { ArrowLeft } from "@lucide/astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const guides = await getCollection("guides");
+  return guides.map((guide) => ({ params: { slug: guide.id }, props: { guide } }));
+}
+
+const { guide } = Astro.props;
+const { Content } = await render(guide);
+---
+
+<BaseLayout title={guide.data.title} description={guide.data.description}>
+  <main id="main-content" data-pagefind-body>
+    <div class="article-shell">
+      <a class="back-link" href="/guides/"><ArrowLeft size={17} />全部指南</a>
+      <header class="article-header">
+        <p class="eyebrow">FIELD GUIDE</p>
+        <h1>{guide.data.title}</h1>
+        <p>{guide.data.description}</p>
+        <time>更新于 {guide.data.updated.toLocaleDateString("zh-CN")}</time>
+      </header>
+      <article class="prose"><Content /></article>
+    </div>
+  </main>
+</BaseLayout>

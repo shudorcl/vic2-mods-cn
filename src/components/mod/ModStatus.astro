@@ -1,0 +1,14 @@
+---
+import { statusLabels } from "../../utils/mods";
+
+interface Props {
+  status: keyof typeof statusLabels;
+}
+
+const { status } = Astro.props;
+---
+
+<span class:list={["status", `status--${status}`]}>
+  <span class="status__dot" aria-hidden="true"></span>
+  {statusLabels[status]}
+</span>

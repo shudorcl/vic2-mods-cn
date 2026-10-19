@@ -1,0 +1,22 @@
+---
+import { Database, ExternalLink, ShieldCheck } from "@lucide/astro";
+import ContentLayout from "../layouts/ContentLayout.astro";
+---
+
+<ContentLayout title="关于这座档案馆" eyebrow="ABOUT THE ARCHIVE" description="一个面向中文玩家、由结构化资料驱动的 Victoria II 模组索引。">
+  <div class="about-grid">
+    <article class="prose about-copy">
+      <h2>我们整理什么</h2>
+      <p>这里不是新闻博客，也不试图原样搬运作者介绍。每份档案优先回答玩家真正关心的问题：模组改变了什么、基于什么、是否仍在维护、中文能否使用，以及去哪里下载。</p>
+      <h2>资料可信度</h2>
+      <p>状态、版本和下载地址会记录最后核验时间。模组开发状态可能随时变化，因此“开发中”只代表最近一次核验结果，不是永久保证。</p>
+      <h2>版权与归属</h2>
+      <p>模组名称、内容与下载文件归各自作者所有。本项目只提供资料索引，并通过外部链接前往作者或社区发布页。Victoria II 为 Paradox Interactive 的商标。</p>
+    </article>
+    <aside class="principles">
+      <div><Database size={21} /><strong>结构化资料</strong><p>分类、版本、语言和谱系均可检索与复用。</p></div>
+      <div><ShieldCheck size={21} /><strong>静态与克制</strong><p>无账户、无追踪器、无运行时外部 API。</p></div>
+      <div><ExternalLink size={21} /><strong>指向原发布页</strong><p>下载入口清楚标记官方来源与社区镜像。</p></div>
+    </aside>
+  </div>
+</ContentLayout>

@@ -1,0 +1,28 @@
+---
+import { GitFork } from "@lucide/astro";
+import type { ModEntry } from "../../utils/mods";
+import { descendantsOf, findMod } from "../../utils/lineage";
+import { modSlug } from "../../utils/mods";
+
+interface Props { mod: ModEntry; allMods: ModEntry[]; }
+const { mod, allMods } = Astro.props;
+const id = modSlug(mod);
+const ancestors = (mod.data.lineage?.basedOn ?? []).map((item) => findMod(allMods, item)).filter(Boolean) as ModEntry[];
+const descendants = descendantsOf(allMods, id);
+---
+
+<div class="lineage-block">
+  <div class="lineage-block__title"><GitFork size={18} /><span>模组谱系</span></div>
+  {ancestors.length === 0 && descendants.length === 0 ? (
+    <p class="muted">当前未记录直接的祖先或派生模组。</p>
+  ) : (
+    <div class="lineage-chain">
+      {ancestors.map((item) => <a href={`/mods/${modSlug(item)}/`}>{item.data.shortName ?? item.data.title}</a>)}
+      {ancestors.length > 0 && <span class="lineage-chain__arrow" aria-hidden="true">→</span>}
+      <strong>{mod.data.shortName ?? mod.data.title}<small>当前</small></strong>
+      {descendants.length > 0 && <span class="lineage-chain__arrow" aria-hidden="true">→</span>}
+      {descendants.map((item) => <a href={`/mods/${modSlug(item)}/`}>{item.data.shortName ?? item.data.title}</a>)}
+    </div>
+  )}
+  <a class="text-link" href="/lineage/">查看完整谱系</a>
+</div>

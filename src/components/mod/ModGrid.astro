@@ -1,0 +1,11 @@
+---
+import type { ModEntry } from "../../utils/mods";
+import ModCard from "./ModCard.astro";
+
+interface Props { mods: ModEntry[]; compact?: boolean; }
+const { mods, compact = false } = Astro.props;
+---
+
+<div class="mod-grid" data-mod-grid>
+  {mods.map((mod) => <ModCard mod={mod} compact={compact} />)}
+</div>

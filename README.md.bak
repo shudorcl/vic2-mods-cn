@@ -1,0 +1,266 @@
+# Victoria II 模组大全
+
+面向中文玩家的 Victoria II 模组资料库、检索站与谱系档案。项目使用 Astro 内容集合生成纯静态站点，不依赖数据库、SSR、账户系统或运行时外部 API。
+
+## 本地开发
+
+```bash
+npm install
+npm run dev
+```
+
+开发服务器默认运行在 `http://localhost:4321`。
+
+## 检查与构建
+
+```bash
+npm run check
+npm run build
+npm run preview
+```
+
+`npm run build` 会先生成 Astro 静态页面，再由 Pagefind 为 `dist/` 建立本地搜索索引。构建产物可直接部署到 Cloudflare Workers Static Assets。
+
+## 内容结构
+
+- 模组档案：`src/content/mods/<id>/index.md`
+- 指南：`src/content/guides/*.md`
+- 普通页面：`src/pages/`
+- 内容 schema：`src/content.config.ts`
+- 公共领域原始图像：`source-images/`
+- 站点图像：`public/images/`
+
+新增模组时必须通过内容集合 schema 校验。可检索、筛选或排序的字段应放在 frontmatter，长篇介绍放在 Markdown 正文。
+
+## 添加模组
+
+在 `src/content/mods/` 下建立以英文 ID 命名的目录：
+
+```text
+src/content/mods/my-mod/
+└── index.md
+```
+
+可以复制已有的 `src/content/mods/gfm/index.md`，也可以使用下面的完整模板：
+
+```md
+---
+title: My Mod
+shortName: MM
+chineseName: 我的模组
+description: 用一句话说明它是什么，以及最重要的特色。
+
+status: active
+gameVersion: ["3.04"]
+latestVersion: "1.0"
+lastUpdated: 2026-10-06
+
+authors: ["作者名"]
+languages: ["en"]
+
+chinese:
+  status: community
+  link: null
+  note: 社区汉化正在维护。
+
+categories:
+  - historical
+  - overhaul
+
+tags:
+  - 中国
+  - 事件
+  - 经济
+
+lineage:
+  basedOn:
+    - hpm
+  inspiredBy: []
+  forks: []
+
+links:
+  github: https://github.com/example/project
+
+downloads:
+  - name: GitHub Releases
+    provider: github
+    url: https://github.com/example/project/releases
+    official: true
+    kind: download
+
+cover: /images/mods/my-mod.webp
+screenshots:
+  - /images/mods/my-mod-wide.webp
+
+featured: false
+
+recommendation:
+  beginnerFriendly: true
+  score: 4
+
+verified:
+  date: 2026-10-06
+  source: github
+---
+
+## 它是什么？
+
+介绍模组定位，以及和原版相比改变了什么。
+
+## 主要特色
+
+- 特色一
+- 特色二
+
+## 适合谁
+
+说明适合哪些玩家，以及是否适合第一次玩模组的人。
+
+## 中文支持
+
+说明汉化来源、适配版本和安装顺序。
+
+## 安装
+
+说明安装步骤、依赖和不能同时启用的模组。
+```
+
+目录名会成为页面地址。例如 `my-mod` 对应 `/mods/my-mod/`。保存后，模组库、详情页、筛选器、谱系反查、全文搜索和 `/mod-index.json` 都会在构建时自动更新。
+
+### 可用字段值
+
+模组开发状态 `status`：
+
+| 值 | 页面显示 |
+| --- | --- |
+| `active` | 开发中 |
+| `completed` | 已完成 |
+| `maintenance` | 维护模式 |
+| `inactive` | 停止开发 |
+| `unknown` | 状态未知 |
+
+中文支持状态 `chinese.status`：
+
+| 值 | 页面显示 |
+| --- | --- |
+| `official` | 官方中文 |
+| `community` | 社区汉化 |
+| `machine` | 机器翻译 |
+| `outdated` | 汉化落后 |
+| `none` | 暂无中文 |
+
+模组分类 `categories`：
+
+| 值 | 页面显示 |
+| --- | --- |
+| `historical` | 历史增强 |
+| `alternate-history` | 架空历史 |
+| `overhaul` | 大型重制 |
+| `cold-war` | 冷战 |
+| `qol` | 体验优化 |
+
+下载渠道 `provider` 可使用 `github`、`moddb`、`baidu`、`website` 或 `other`。下载类型 `kind` 可使用 `download`、`mirror` 或 `localization`。
+
+`recommendation.score` 必须为 1 到 5 的整数。`verified.source` 可使用 `github`、`moddb`、`website` 或 `community`。完整约束始终以 `src/content.config.ts` 为准。
+
+### 模组图片
+
+将最终图片放入：
+
+```text
+public/images/mods/my-mod.webp
+public/images/mods/my-mod-wide.webp
+```
+
+推荐规格：
+
+- 卡片和详情封面：`800 × 500` WebP
+- 正文宽图：`1280 × 560` WebP
+- 尽量控制单张图片体积，不要直接提交巨大的 PNG 原图
+- 自己保留的高质量原图可以放在 `source-images/`
+- 使用第三方或公共领域图片时，在 `CREDITS.md` 记录来源和许可证
+
+图片必须由本站提供，不要在 Markdown 中直接引用 GitHub、ModDB、图床或 CDN 图片地址。
+
+### 谱系关系
+
+`lineage.basedOn` 填直接基础项目的目录 ID，不是显示名称：
+
+```yaml
+lineage:
+  basedOn: ["hfm"]
+  inspiredBy: ["hpm"]
+  forks: []
+```
+
+例如 GFM 的目录是 `src/content/mods/gfm/`，它的 ID 就是 `gfm`。谱系页和详情页的祖先、派生模组会根据这些字段自动计算。
+
+## 添加指南
+
+在 `src/content/guides/` 新建 Markdown 文件，例如：
+
+```text
+src/content/guides/economy.md
+```
+
+内容模板：
+
+```md
+---
+title: 经济系统入门
+description: 解释工厂、市场和人口需求。
+order: 4
+updated: 2026-10-06
+---
+
+## 工厂如何运作
+
+正文内容……
+```
+
+文件名会成为地址，上例对应 `/guides/economy/`。`order` 控制指南列表顺序。保存后，指南列表和 Pagefind 全文搜索会自动收录。
+
+## 添加普通页面
+
+在 `src/pages/` 新建 Astro 文件。例如 `src/pages/resources.astro` 会生成 `/resources/`：
+
+```astro
+---
+import ContentLayout from "../layouts/ContentLayout.astro";
+---
+
+<ContentLayout
+  title="社区资源"
+  eyebrow="RESOURCES"
+  description="常用工具、社区与资料入口。"
+>
+  <article class="prose">
+    <h2>工具</h2>
+    <p>页面内容……</p>
+  </article>
+</ContentLayout>
+```
+
+如果页面需要加入顶部导航，编辑 `src/components/Header.astro` 中的 `links` 数组。页脚链接位于 `src/components/Footer.astro`。全局样式集中在 `src/styles/global.css`。
+
+## 日常维护流程
+
+1. 运行 `npm run dev` 启动本地开发服务器。
+2. 添加或修改 Markdown、图片和页面。
+3. 在桌面和手机宽度下检查页面。
+4. 运行 `npm run check` 检查类型和内容字段。
+5. 运行 `npm run build` 生成正式站点与 Pagefind 搜索索引。
+6. 使用 `npm run preview` 检查最终构建结果。
+
+如果 frontmatter 中有拼写错误、无效 URL、错误状态值或缺少必填字段，`npm run check` 或 `npm run build` 会指出对应文件和字段。
+
+不要手动编辑 `dist/`。它是构建产物，每次执行 `npm run build` 都会重新生成。
+
+## 部署
+
+```bash
+npm run build
+npx wrangler deploy
+```
+
+部署配置位于 `wrangler.jsonc`，静态资源目录为 `dist/`。

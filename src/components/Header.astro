@@ -1,0 +1,42 @@
+---
+import { Menu, Search, X } from "@lucide/astro";
+
+const path = Astro.url.pathname;
+const links = [
+  { href: "/mods/", label: "模组库" },
+  { href: "/lineage/", label: "模组谱系" },
+  { href: "/guides/", label: "专题指南" },
+  { href: "/about/", label: "关于" },
+];
+---
+
+<header class="site-header" data-pagefind-ignore>
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="Victoria II 模组大全首页">
+      <span class="brand__seal" aria-hidden="true">V<small>II</small></span>
+      <span class="brand__text"><strong>VIC2 MODS</strong><small>维多利亚 2 模组档案</small></span>
+    </a>
+    <nav class="desktop-nav" aria-label="主导航">
+      {links.map((link) => <a class:list={{ active: path.startsWith(link.href) }} href={link.href}>{link.label}</a>)}
+    </nav>
+    <a class="header-search" href="/search/" aria-label="搜索"><Search size={19} /><span>搜索</span></a>
+    <button class="menu-button" type="button" aria-label="打开导航" aria-controls="mobile-menu" aria-expanded="false">
+      <Menu class="menu-icon-open" size={22} />
+      <X class="menu-icon-close" size={22} />
+    </button>
+  </div>
+  <nav class="mobile-nav" id="mobile-menu" aria-label="移动端导航">
+    {links.map((link) => <a class:list={{ active: path.startsWith(link.href) }} href={link.href}>{link.label}</a>)}
+    <a href="/search/"><Search size={17} />搜索</a>
+  </nav>
+</header>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>(".menu-button");
+  const menu = document.querySelector<HTMLElement>(".mobile-nav");
+  button?.addEventListener("click", () => {
+    const open = button.getAttribute("aria-expanded") === "true";
+    button.setAttribute("aria-expanded", String(!open));
+    menu?.classList.toggle("is-open", !open);
+  });
+</script>

@@ -1,0 +1,45 @@
+---
+import { getCollection } from "astro:content";
+import { ArrowDown, GitFork } from "@lucide/astro";
+import ContentLayout from "../../layouts/ContentLayout.astro";
+import ModStatus from "../../components/mod/ModStatus.astro";
+import { descendantsOf } from "../../utils/lineage";
+import { modSlug } from "../../utils/mods";
+
+const mods = await getCollection("mods");
+const roots = mods.filter((mod) => !(mod.data.lineage?.basedOn.length));
+---
+
+<ContentLayout title="模组谱系" eyebrow="LINEAGE ARCHIVE" description="从祖先项目到活跃后继，梳理 Victoria II 大型模组之间的继承、分支与影响关系。">
+  <section class="lineage-intro">
+    <GitFork size={24} />
+    <p>谱系表示内容或代码基础，不等于简单的“新版替代旧版”。每个项目仍可能拥有独立的设计方向与适合人群。</p>
+  </section>
+  <div class="lineage-trees">
+    {roots.map((root) => {
+      const children = descendantsOf(mods, modSlug(root));
+      return (
+        <section class="lineage-tree">
+          <div class="lineage-node lineage-node--root">
+            <div><span>根项目</span><h2>{root.data.shortName}</h2><p>{root.data.title}</p></div>
+            <ModStatus status={root.data.status} />
+            <a href={`/mods/${modSlug(root)}/`}>查看档案</a>
+          </div>
+          {children.length > 0 && <div class="lineage-connector"><ArrowDown size={20} /></div>}
+          {children.map((child) => {
+            const grandchildren = descendantsOf(mods, modSlug(child));
+            return <div class="lineage-branch">
+              <div class="lineage-node">
+                <div><span>基于 {root.data.shortName}</span><h3>{child.data.shortName}</h3><p>{child.data.title}</p></div>
+                <ModStatus status={child.data.status} />
+                <a href={`/mods/${modSlug(child)}/`}>查看档案</a>
+              </div>
+              {grandchildren.length > 0 && <div class="lineage-connector"><ArrowDown size={20} /></div>}
+              {grandchildren.map((item) => <div class="lineage-node lineage-node--active"><div><span>基于 {child.data.shortName}</span><h3>{item.data.shortName}</h3><p>{item.data.title}</p></div><ModStatus status={item.data.status} /><a href={`/mods/${modSlug(item)}/`}>查看档案</a></div>)}
+            </div>;
+          })}
+        </section>
+      );
+    })}
+  </div>
+</ContentLayout>

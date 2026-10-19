@@ -1,0 +1,13 @@
+---
+import { getCollection } from "astro:content";
+import { ArrowRight, BookOpen } from "@lucide/astro";
+import ContentLayout from "../../layouts/ContentLayout.astro";
+
+const guides = (await getCollection("guides")).sort((a, b) => a.data.order - b.data.order);
+---
+
+<ContentLayout title="专题指南" eyebrow="FIELD GUIDES" description="从安装到选择，用尽量短的篇幅回答开始游玩前最实际的问题。">
+  <div class="guide-grid">
+    {guides.map((guide, index) => <a class="guide-card" href={`/guides/${guide.id}/`}><span class="guide-card__number">0{index + 1}</span><BookOpen size={22} /><h2>{guide.data.title}</h2><p>{guide.data.description}</p><span class="text-link">阅读指南 <ArrowRight size={16} /></span></a>)}
+  </div>
+</ContentLayout>

@@ -1,0 +1,20 @@
+---
+import { categoryLabels } from "../../utils/mods";
+
+interface Props {
+  categories: (keyof typeof categoryLabels)[];
+  tags?: string[];
+  limit?: number;
+}
+
+const { categories, tags = [], limit = 0 } = Astro.props;
+const items = [
+  ...categories.map((key) => ({ label: categoryLabels[key], kind: "category" })),
+  ...tags.map((label) => ({ label, kind: "tag" })),
+];
+const visible = limit > 0 ? items.slice(0, limit) : items;
+---
+
+<div class="tag-list">
+  {visible.map((item) => <span class:list={["tag", `tag--${item.kind}`]}>{item.label}</span>)}
+</div>

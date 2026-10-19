@@ -1,0 +1,95 @@
+---
+import { getCollection } from "astro:content";
+import { ArrowRight, BookOpen, GitFork, Search } from "@lucide/astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ModGrid from "../components/mod/ModGrid.astro";
+import { categoryLabels, modSlug, sortByRecommendation, sortByUpdated } from "../utils/mods";
+
+const mods = await getCollection("mods");
+const featured = sortByRecommendation(mods.filter((mod) => mod.data.featured)).slice(0, 6);
+const updated = sortByUpdated(mods).slice(0, 5);
+const categories = Object.entries(categoryLabels);
+const activeCount = mods.filter((mod) => ["active", "maintenance"].includes(mod.data.status)).length;
+const chineseCount = mods.filter((mod) => mod.data.chinese.status !== "none").length;
+---
+
+<BaseLayout>
+  <main id="main-content">
+    <section class="home-hero">
+      <img class="home-hero__image" src="/images/archive-hero.webp" alt="十九世纪世界地图与档案桌面" width="1920" height="960" />
+      <div class="home-hero__shade"></div>
+      <div class="shell home-hero__content">
+        <p class="eyebrow eyebrow--light">VICTORIA II MODS ARCHIVE</p>
+        <h1>维多利亚 2<br />模组大全</h1>
+        <p class="home-hero__lead">收录大型模组、社区汉化与谱系资料，帮你找到下一局值得玩的世界。</p>
+        <form class="hero-search" action="/search/" method="get">
+          <Search size={21} aria-hidden="true" />
+          <input type="search" name="q" aria-label="搜索全站" placeholder="搜索模组、国家、题材或机制…" />
+          <button type="submit">搜索</button>
+        </form>
+        <div class="hero-stats" aria-label="收录统计">
+          <span><strong>{mods.length}</strong> 个首批档案</span>
+          <span><strong>{activeCount}</strong> 个仍在维护</span>
+          <span><strong>{chineseCount}</strong> 个中文可用</span>
+        </div>
+      </div>
+      <a class="hero-next" href="#featured">向下浏览<span aria-hidden="true">↓</span></a>
+    </section>
+
+    <section class="section shell" id="featured">
+      <div class="section-heading">
+        <div><p class="eyebrow">编辑精选</p><h2>从这里开始探索</h2></div>
+        <a class="text-link" href="/mods/">查看全部 <ArrowRight size={16} /></a>
+      </div>
+      <ModGrid mods={featured} />
+    </section>
+
+    <section class="category-band">
+      <div class="shell">
+        <div class="section-heading section-heading--light">
+          <div><p class="eyebrow eyebrow--light">按类型浏览</p><h2>你想进入怎样的世界？</h2></div>
+        </div>
+        <div class="category-links">
+          {categories.map(([key, label], index) => (
+            <a href={`/mods/?category=${key}`}><span>0{index + 1}</span><strong>{label}</strong><ArrowRight size={18} /></a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="lineage-feature">
+      <div class="shell lineage-feature__grid">
+        <div>
+          <p class="eyebrow">核心档案</p>
+          <h2>一眼看懂模组从哪里来</h2>
+          <p>HPM、HFM、GFM 并不是三个毫无关系的名字。谱系档案记录每个项目的基础、分支与后继关系。</p>
+          <a class="button-link" href="/lineage/"><GitFork size={18} />查看完整谱系</a>
+        </div>
+        <div class="lineage-preview" aria-label="HPM 到 GFM 谱系示例">
+          <span>原版增强</span>
+          <a href="/mods/hpm/"><small>2009—</small><strong>HPM</strong><em>Historical Project Mod</em></a>
+          <i aria-hidden="true"></i>
+          <a href="/mods/hfm/"><small>基于 HPM</small><strong>HFM</strong><em>Historical Flavour Mod</em></a>
+          <i aria-hidden="true"></i>
+          <a href="/mods/gfm/"><small>活跃后继</small><strong>GFM</strong><em>Greater Flavor Mod</em></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell home-lists">
+      <div>
+        <div class="section-heading"><div><p class="eyebrow">档案动态</p><h2>最近更新</h2></div></div>
+        <div class="update-list">
+          {updated.map((mod) => <a href={`/mods/${modSlug(mod)}/`}><span>{mod.data.shortName}</span><strong>{mod.data.title}</strong><time>{mod.data.lastUpdated?.toLocaleDateString("zh-CN")}</time></a>)}
+        </div>
+      </div>
+      <aside class="guide-callout">
+        <BookOpen size={25} />
+        <p class="eyebrow">新玩家入口</p>
+        <h2>第一次玩模组？</h2>
+        <p>从安装目录、版本匹配到第一款模组选择，三篇短指南带你避开最常见的问题。</p>
+        <a class="text-link" href="/guides/">阅读入门指南 <ArrowRight size={16} /></a>
+      </aside>
+    </section>
+  </main>
+</BaseLayout>

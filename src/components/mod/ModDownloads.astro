@@ -1,0 +1,17 @@
+---
+import { Download, ExternalLink } from "@lucide/astro";
+import type { ModEntry } from "../../utils/mods";
+
+interface Props { downloads: ModEntry["data"]["downloads"]; }
+const { downloads } = Astro.props;
+const kindLabel = { download: "下载", mirror: "社区镜像", localization: "汉化" } as const;
+---
+
+<div class="downloads">
+  {downloads.length ? downloads.map((item, index) => (
+    <a class:list={["download-link", { "download-link--primary": index === 0 }]} href={item.url} target="_blank" rel="noreferrer">
+      {index === 0 ? <Download size={18} /> : <ExternalLink size={17} />}
+      <span><strong>{item.name}</strong><small>{item.official ? "官方" : kindLabel[item.kind]}</small></span>
+    </a>
+  )) : <p class="muted">暂未收录可靠下载地址。</p>}
+</div>

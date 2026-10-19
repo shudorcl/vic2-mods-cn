@@ -1,0 +1,25 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FilterBar from "../../components/search/FilterBar.astro";
+import ModGrid from "../../components/mod/ModGrid.astro";
+import { sortByRecommendation } from "../../utils/mods";
+
+const mods = sortByRecommendation(await getCollection("mods"));
+---
+
+<BaseLayout title="模组库" description="浏览、筛选并比较已收录的 Victoria II 模组。">
+  <main id="main-content">
+    <header class="directory-header">
+      <div class="shell directory-title">
+        <div><p class="eyebrow">MOD DIRECTORY</p><h1>模组库</h1><p>按题材、开发状态与中文可用性筛选。</p></div>
+        <strong>{mods.length}<small>MODS</small></strong>
+      </div>
+    </header>
+    <div class="shell directory-content">
+      <FilterBar />
+      <ModGrid mods={mods} />
+      <p class="empty-result" hidden>没有符合当前条件的模组。</p>
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,33 @@
+---
+import { ArrowUpRight } from "@lucide/astro";
+import type { ModEntry } from "../../utils/mods";
+import { chineseLabels, modSlug } from "../../utils/mods";
+import ModStatus from "./ModStatus.astro";
+import ModTags from "./ModTags.astro";
+
+interface Props { mod: ModEntry; compact?: boolean; }
+const { mod, compact = false } = Astro.props;
+const slug = modSlug(mod);
+---
+
+<article class:list={["mod-card", { "mod-card--compact": compact }]} data-mod-card data-search={`${mod.data.title} ${mod.data.shortName ?? ""} ${mod.data.chineseName ?? ""} ${mod.data.description} ${mod.data.tags.join(" ")}`.toLowerCase()} data-categories={mod.data.categories.join(",")} data-status={mod.data.status} data-chinese={mod.data.chinese.status !== "none"} data-score={mod.data.recommendation.score} data-updated={mod.data.lastUpdated?.getTime() ?? 0}>
+  <a class="mod-card__image" href={`/mods/${slug}/`} tabindex="-1" aria-hidden="true">
+    <img src={mod.data.cover} alt="" loading="lazy" width="640" height="400" />
+    <span class="mod-card__monogram">{mod.data.shortName ?? mod.data.title.slice(0, 3)}</span>
+  </a>
+  <div class="mod-card__body">
+    <div class="mod-card__heading">
+      <div>
+        <p class="mod-card__short">{mod.data.shortName}</p>
+        <h3><a href={`/mods/${slug}/`}>{mod.data.title}</a></h3>
+      </div>
+      <ArrowUpRight size={18} aria-hidden="true" />
+    </div>
+    <p class="mod-card__description">{mod.data.description}</p>
+    <ModTags categories={mod.data.categories} limit={2} />
+    <div class="mod-card__footer">
+      <ModStatus status={mod.data.status} />
+      <span class="mod-card__language">{chineseLabels[mod.data.chinese.status]}</span>
+    </div>
+  </div>
+</article>
